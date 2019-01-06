@@ -5,7 +5,7 @@ I'll write a proper blog post about this, please come back at a later date.
 I hacked my coffee machine to serve me coffee via a beautiful web interface.
 
 ## Demo 
-`<INSERT EXAMPLE HERE>`
+![How the UI looks like](./media/UI.png)
 
 ## Blogpost
 `<INSERT LINK HERE>`
