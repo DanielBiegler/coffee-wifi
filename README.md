@@ -9,3 +9,8 @@ I hacked my coffee machine to serve me coffee via a beautiful web interface.
 
 ## Blogpost
 `<INSERT LINK HERE>`
+
+## GPIO Schema
+- GPIO2 => `<todo>`
+- GPIO3 => `<todo>`
+- GPIO4 => `<todo>`
