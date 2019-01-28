@@ -1,17 +1,59 @@
 <?php
+$path_gpio = '/sys/class/gpio';
+$path_gpio_export = '/sys/class/gpio/export';
 
+$path_gpio_cup_one = '/sys/class/gpio/gpio2';
+$path_gpio_cup_two = '/sys/class/gpio/gpio3';
+$path_gpio_power = '/sys/class/gpio/gpio4';
 
 function make_coffee($num_cups)
 {
-    echo "Error: Functionality is not yet implemented.";
-    return 503;
+    global $path_gpio_cup_one, $path_gpio_cup_two;
+    
+    if($num_cups === '1')
+    {
+        $path_gpio_cup_one_value = $path_gpio_cup_one.'/value';
+        $currentValue = file_get_contents($path_gpio_cup_one_value);
+        $result = file_put_contents($path_gpio_cup_one_value, $currentValue[0] === "0" ? 1 : 0);
+
+        if($result) {
+            return 200;
+        } else {
+            return 500;
+        }
+    } 
+    elseif($num_cups === '2')
+    {
+        $path_gpio_cup_two_value = $path_gpio_cup_two.'/value';
+        $currentValue = file_get_contents($path_gpio_cup_two_value);
+        $result = file_put_contents($path_gpio_cup_two_value, $currentValue[0] === "0" ? 1 : 0);
+
+        if($result) {
+            return 200;
+        } else {
+            return 500;
+        }
+    }
+    else
+    {
+        echo "Error: Invalid cup amount. The only valid options are either '1' or '2'.";
+        return 503;
+    }
 }
 
 
 function toggle_power()
 {
-    echo "Error: Functionality is not yet implemented.";
-    return 503;
+    global $path_gpio_power;
+    $path_gpio_power_value = $path_gpio_power.'/value';
+
+    $currentValue = file_get_contents($path_gpio_power_value);
+    $result = file_put_contents($path_gpio_power_value, $currentValue[0] === "0" ? 1 : 0);
+    if($result) {
+        return 200;
+    } else {
+        return 500;
+    }
 }
 
 
@@ -32,11 +74,10 @@ if(isset($_POST['cups']))
 }
 elseif(isset($_POST['power']))
 {
-    $power = $_POST['power'];
-    if($power !== "toggle")
+    if($_POST['power'] !== "toggle")
     {
-        http_response_code(400);
         echo "Error: Invalid power value. The only valid option is 'toggle'.";
+        http_response_code(503);
         die;
     }
     else
