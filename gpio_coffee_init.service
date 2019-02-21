@@ -1,0 +1,9 @@
+[Unit]
+Description=Sets up the necessary files and permissions for the 2nd, 3rd, 4th GPIO pins to work.
+
+[Service]
+Type=oneshot
+ExecStart=/bin/gpio_coffee_init.sh
+
+[Install]
+WantedBy=multi-user.target
