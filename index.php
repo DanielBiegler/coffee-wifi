@@ -14,6 +14,7 @@ $BUTTON_PRESS_DELAY = 500000; // in microseconds
 $HTTP_RESPONSE_CODE_OK = 200;
 $HTTP_RESPONSE_CODE_SERVERERROR = 500;
 
+
 /**
  * Turns the coffee pins on and - after a delay - off again.
  * @return int Either response code $HTTP_RESPONSE_CODE_OK for success, or response code $HTTP_RESPONSE_CODE_SERVERERROR for failure.
@@ -27,50 +28,41 @@ function make_coffee($num_cups)
     , $BUTTON_PRESS_DELAY
     , $HTTP_RESPONSE_CODE_OK
     , $HTTP_RESPONSE_CODE_SERVERERROR;
+
     
+    $path_gpio_cup_amount_value = NULL;
     if($num_cups === '1')
     {
-        $path_gpio_cup_one_value = $path_gpio_cup_one.'/value';
-        $currentValue = file_get_contents($path_gpio_cup_one_value);
-        $result = file_put_contents($path_gpio_cup_one_value, $GPIO_ON); // turn on
-
-        usleep($BUTTON_PRESS_DELAY);
-
-        $currentValue = file_get_contents($path_gpio_cup_one_value);
-        $result = file_put_contents($path_gpio_cup_one_value, $GPIO_OFF); // turn off
-
-        if($result) {
-            return $HTTP_RESPONSE_CODE_OK;
-        } else {
-            return $HTTP_RESPONSE_CODE_SERVERERROR;
-        }
+        $path_gpio_cup_amount_value = $path_gpio_cup_one.'/value';
     } 
     elseif($num_cups === '2')
     {
-        $path_gpio_cup_two_value = $path_gpio_cup_two.'/value';
-        $currentValue = file_get_contents($path_gpio_cup_two_value);
-        $result = file_put_contents($path_gpio_cup_two_value, $GPIO_ON);
-
-        usleep($BUTTON_PRESS_DELAY);
-
-        $currentValue = file_get_contents($path_gpio_cup_two_value);
-        $result = file_put_contents($path_gpio_cup_two_value, $GPIO_OFF);
-
-        if($result) {
-            return $HTTP_RESPONSE_CODE_OK;
-        } else {
-            return $HTTP_RESPONSE_CODE_SERVERERROR;
-        }
+        $path_gpio_cup_amount_value = $path_gpio_cup_two.'/value';
     }
     else
     {
         echo "Error: Invalid cup amount. The only valid options are either '1' or '2'.";
         return $HTTP_RESPONSE_CODE_SERVERERROR;
     }
+
+    $currentValue = file_get_contents($path_gpio_cup_amount_value);
+    $result = file_put_contents($path_gpio_cup_amount_value, $GPIO_ON);
+
+    usleep($BUTTON_PRESS_DELAY);
+
+    $currentValue = file_get_contents($path_gpio_cup_amount_value);
+    $result = file_put_contents($path_gpio_cup_amount_value, $GPIO_OFF);
+
+    if($result) {
+        return $HTTP_RESPONSE_CODE_OK;
+    } else {
+        return $HTTP_RESPONSE_CODE_SERVERERROR;
+    }
 }
 
+
 /**
- * Reads the current value of the pin for power and toggles it.
+ * Reads the current value of the pin responsible for power and toggles it.
  * @return int Either response code $HTTP_RESPONSE_CODE_OK for success, or response code $HTTP_RESPONSE_CODE_SERVERERROR for failure.
  */
 function toggle_power()
@@ -85,6 +77,8 @@ function toggle_power()
     $path_gpio_power_value = $path_gpio_power.'/value';
 
     $currentValue = file_get_contents($path_gpio_power_value);
+    // [0] because the FIRST character should be either '1' or '0'
+    // else we compare a longer string due to the last byte in the file
     $result = file_put_contents($path_gpio_power_value, $currentValue[0] === $GPIO_ON ? $GPIO_OFF : $GPIO_ON);
 
     usleep($BUTTON_PRESS_DELAY);
@@ -175,109 +169,41 @@ elseif(isset($_POST['power']))
 
     <script>
 
+        /**
+         * Schema:
+         * <#id>: <post-request>
+         */
+        const buttons = {
+            'btn-one-cup': 'cups=1',
+            'btn-two-cups': 'cups=2',
+            'btn-power': 'power=toggle'
+        };
 
-        // // // ONE CUP
-        const btnOneCup = document.getElementById('btn-one-cup');
-        btnOneCup.addEventListener('click', e => {
-            function handleResponse() {
-                let xhttp = this;
-                if(xhttp.status === <?php echo $HTTP_RESPONSE_CODE_OK; ?>) {
-                    setTimeout(() => {
-                        btnOneCup.classList.remove('is-loading');
-                        btnOneCup.classList.add('is-success');
-                        setTimeout(() => {
-                            btnOneCup.classList.remove('is-success');
-                        }, 800);
-                    }, 350);
-                } else {
-                    setTimeout(() => {
-                        btnOneCup.classList.remove('is-loading');
-                        btnOneCup.classList.add('is-danger');
-                        setTimeout(() => {
-                            btnOneCup.classList.remove('is-danger');
-                        }, 800);
-                    }, 350);
-                }
-            }
-            
-            const xhttp = new XMLHttpRequest();
-            xhttp.open('POST', '/', true);
-            xhttp.onload = handleResponse;
-            xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhttp.send('cups=1');
-        });
-
-
-        // // // TWO CUPS
-        const btnTwoCups = document.getElementById('btn-two-cups');
-        btnTwoCups.addEventListener('click', e => {
-            function handleResponse() {
-                let xhttp = this;
-                if(xhttp.status === <?php echo $HTTP_RESPONSE_CODE_OK; ?>) {
-                    setTimeout(() => {
-                        btnTwoCups.classList.remove('is-loading');
-                        btnTwoCups.classList.add('is-success');
-                        setTimeout(() => {
-                            btnTwoCups.classList.remove('is-success');
-                        }, 800);
-                    }, 350);
-                } else {
-                    setTimeout(() => {
-                        btnTwoCups.classList.remove('is-loading');
-                        btnTwoCups.classList.add('is-danger');
-                        setTimeout(() => {
-                            btnTwoCups.classList.remove('is-danger');
-                        }, 800);
-                    }, 350);
-                }
-            }
-            
-            const xhttp = new XMLHttpRequest();
-            xhttp.open('POST', '/', true);
-            xhttp.onload = handleResponse;
-            xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhttp.send("cups=2");
-        });
-
-
-        // // // POWER
-        const btnPower = document.getElementById('btn-power');
-        btnPower.addEventListener('click', e => {
-            function handleResponse() {
-                let xhttp = this;
-                if(xhttp.status === <?php echo $HTTP_RESPONSE_CODE_OK; ?>) {
-                    setTimeout(() => {
-                        btnPower.classList.remove('is-loading');
-                        btnPower.classList.add('is-success');
-                        setTimeout(() => {
-                            btnPower.classList.remove('is-success');
-                        }, 800);
-                    }, 350);
-                } else {
-                    setTimeout(() => {
-                        btnPower.classList.remove('is-loading');
-                        btnPower.classList.add('is-danger');
-                        setTimeout(() => {
-                            btnPower.classList.remove('is-danger');
-                        }, 800);
-                    }, 350);
-                }
-            }
-            
-            const xhttp = new XMLHttpRequest();
-            xhttp.open('POST', '/', true);
-            xhttp.onload = handleResponse;
-            xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhttp.send("power=toggle");
-        });
-                
-        
-        // Make buttons pleasant
-        document.querySelectorAll('button').forEach(button => {
+        // set each handler up, for all buttons inside `buttons`
+        for(const id in buttons) {
+            const button = document.getElementById(id);
             button.addEventListener('click', e => {
                 button.classList.add('is-loading');
+
+                function handleResponse() {
+                    const xhttp = this;
+                    const statusClass = xhttp.status === <?php echo $HTTP_RESPONSE_CODE_OK; ?> ? 'is-success' : 'is-danger';
+                    button.classList.remove('is-loading');
+                    button.classList.add(statusClass);
+                    // show the result for some time
+                    setTimeout(() => {
+                        button.classList.remove(statusClass);
+                    }, 800);
+                }
+                
+                const xhttp = new XMLHttpRequest();
+                xhttp.open('POST', '/', true);
+                xhttp.onload = handleResponse;
+                xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhttp.send(buttons[id]);
             });
-        });
+        }
+
     </script>
     
 </body>
