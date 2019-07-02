@@ -11,6 +11,6 @@ I hacked my coffee machine to serve me coffee via a beautiful web interface.
 `<INSERT LINK HERE>`
 
 ## GPIO Schema
-- GPIO2 => `<todo>`
-- GPIO3 => `<todo>`
-- GPIO4 => `<todo>`
+- `GPIO2` => `Toggle power`
+- `GPIO3` => `Brew one cup`
+- `GPIO4` => `Brew two cups`
