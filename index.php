@@ -139,8 +139,8 @@ elseif(isset($_POST['power']))
     <link name="theme-color" content="#000000">
 </head>
 <body>
-    <section class="section" style="position: absolute; bottom: 200px; right: 20px;">
-        <div class="content has-text-right">
+    <section class="section">
+        <div class="content">
 
             <button id="btn-two-cups" class="button is-info is-rounded is-large">
                 <span class="icon">
@@ -197,7 +197,7 @@ elseif(isset($_POST['power']))
                 }
                 
                 const xhttp = new XMLHttpRequest();
-                xhttp.open('POST', '/', true);
+                xhttp.open('POST', '', true);
                 xhttp.onload = handleResponse;
                 xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 xhttp.send(buttons[id]);
